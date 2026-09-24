@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DocInput, { DocValue } from "../DocInput";
 import { compareDocuments } from "@/lib/api";
 
 const SIGNIFICANCE_STYLES: Record<string, string> = {
   high: "bg-risk/10 text-risk border-risk/30",
   medium: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-  low: "bg-accent/10 text-accent border-accent/30",
+  low: "bg-stamp/10 text-stamp border-stamp/30",
 };
 
 export default function Compare() {
@@ -16,16 +16,24 @@ export default function Compare() {
   const [result, setResult] = useState<Awaited<ReturnType<typeof compareDocuments>> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
   const ready = Boolean((a.text?.trim() || a.file) && (b.text?.trim() || b.file));
 
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
   async function run() {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      setResult(await compareDocuments(a, b));
+      setResult(await compareDocuments(a, b, controller.signal));
     } catch (e) {
+      if ((e as Error).name === "AbortError") return;
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -45,7 +53,7 @@ export default function Compare() {
         type="button"
         onClick={run}
         disabled={!ready || loading}
-        className="focus-ring bg-accent text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40"
+        className="focus-ring bg-accent text-ink text-sm font-semibold px-4 py-2 rounded-md disabled:opacity-40 hover:brightness-95"
       >
         {loading ? "Comparing…" : "Compare documents"}
       </button>
@@ -56,7 +64,7 @@ export default function Compare() {
       )}
       {result && (
         <div aria-live="polite" className="space-y-4">
-          <p className="text-sm bg-white/70 border border-ink/10 rounded-lg p-3">{result.summary}</p>
+          <p className="text-sm bg-white border border-ink/15 rounded-md p-3">{result.summary}</p>
           <ul className="space-y-3">
             {result.differences.map((d, i) => (
               <li
@@ -65,18 +73,20 @@ export default function Compare() {
                   SIGNIFICANCE_STYLES[d.significance] ?? SIGNIFICANCE_STYLES.low
                 }`}
               >
-                <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-start justify-between gap-3 mb-1.5">
                   <h3 className="font-semibold text-sm">{d.topic}</h3>
-                  <span className="text-[10px] uppercase tracking-wide font-medium opacity-80">
-                    {d.significance}
+                  <span className="shrink-0 text-[11px] font-medium opacity-80 border border-current/30 rounded px-1.5 py-0.5">
+                    {d.significance} difference
                   </span>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-2 text-sm">
+                <div className="grid sm:grid-cols-2 gap-3 text-sm font-doc">
                   <p>
-                    <span className="font-medium">A:</span> {d.document_a}
+                    <span className="font-sans font-medium not-italic">Doc A — </span>
+                    {d.document_a}
                   </p>
                   <p>
-                    <span className="font-medium">B:</span> {d.document_b}
+                    <span className="font-sans font-medium not-italic">Doc B — </span>
+                    {d.document_b}
                   </p>
                 </div>
                 <p className="text-xs mt-1 opacity-80">{d.note}</p>

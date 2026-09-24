@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callClaude, AiServiceError } from "@/lib/anthropic";
+import { callClaude, streamClaude, AiServiceError } from "@/lib/anthropic";
 import { extractTextFromFile, DocumentParseError } from "@/lib/parseDocument";
 import { SIMPLIFY_SYSTEM, requireNonEmptyString, ValidationError } from "@/lib/prompts";
 
@@ -9,27 +9,37 @@ export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") || "";
-    let text: string;
 
     if (contentType.includes("multipart/form-data")) {
+      // File uploads must be fully parsed before we know what to send the
+      // model, so this path returns a single JSON response as before.
       const form = await req.formData();
       const file = form.get("file");
       if (!(file instanceof File)) {
         throw new ValidationError('Expected a "file" field in the form data.');
       }
-      text = await extractTextFromFile(file);
-    } else {
-      const body = await req.json();
-      text = requireNonEmptyString(body.text, "text");
+      const text = await extractTextFromFile(file);
+      const result = await callClaude({
+        system: SIMPLIFY_SYSTEM,
+        prompt: `Document:\n"""\n${text}\n"""`,
+        maxTokens: 2500,
+      });
+      return NextResponse.json({ simplified: result });
     }
 
-    const result = await callClaude({
+    const body = await req.json();
+    const text = requireNonEmptyString(body.text, "text");
+
+    // Pasted-text path streams: the client sees text as it's generated
+    // instead of waiting for the full response to buffer server-side.
+    const stream = streamClaude({
       system: SIMPLIFY_SYSTEM,
       prompt: `Document:\n"""\n${text}\n"""`,
       maxTokens: 2500,
     });
-
-    return NextResponse.json({ simplified: result });
+    return new Response(stream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   } catch (err) {
     return handleError(err);
   }

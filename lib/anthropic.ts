@@ -34,6 +34,43 @@ export class AiServiceError extends Error {
 }
 
 /**
+ * Streams a Claude completion as plain text chunks. Used for long, plain-text
+ * outputs (e.g. Simplify) so the client can render text as it arrives instead
+ * of waiting for the full ~2000-token response to buffer on the server first —
+ * this cuts perceived latency without any extra token cost.
+ */
+export function streamClaude(params: {
+  system: string;
+  prompt: string;
+  maxTokens?: number;
+}): ReadableStream<Uint8Array> {
+  const { system, prompt, maxTokens = 2000 } = params;
+  const encoder = new TextEncoder();
+
+  return new ReadableStream({
+    async start(controller) {
+      try {
+        const anthropic = getClient();
+        const stream = anthropic.messages.stream({
+          model: MODEL,
+          max_tokens: maxTokens,
+          system,
+          messages: [{ role: "user", content: prompt }],
+        });
+        stream.on("text", (chunk) => controller.enqueue(encoder.encode(chunk)));
+        await stream.finalMessage();
+        controller.close();
+      } catch (err) {
+        controller.error(
+          err instanceof Error ? err : new Error("Unknown streaming failure.")
+        );
+      }
+    },
+  });
+}
+
+
+/**
  * Calls Claude with a system prompt + single user turn and returns the
  * concatenated text of the response. Centralizes error handling so every
  * API route fails the same, predictable way instead of leaking SDK errors.

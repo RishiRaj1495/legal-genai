@@ -21,8 +21,8 @@ export default function DocInput({
   const fileId = useId();
 
   return (
-    <fieldset className="border border-ink/15 rounded-lg p-4">
-      <legend className="px-1 text-sm font-semibold">{label}</legend>
+    <fieldset className="border border-ink/15 rounded-md p-4 bg-white/40">
+      <legend className="px-1 text-sm font-medium">{label}</legend>
       <div className="flex gap-2 mb-3" role="radiogroup" aria-label={`${label} input mode`}>
         {(["paste", "upload"] as const).map((m) => (
           <button
@@ -31,10 +31,10 @@ export default function DocInput({
             role="radio"
             aria-checked={mode === m}
             onClick={() => setMode(m)}
-            className={`focus-ring text-xs px-3 py-1.5 rounded-full border transition-colors ${
+            className={`focus-ring text-xs px-3 py-1.5 rounded border transition-colors ${
               mode === m
-                ? "bg-accent text-white border-accent"
-                : "bg-transparent text-ink/70 border-ink/20 hover:border-ink/40"
+                ? "bg-ink text-paper border-ink"
+                : "bg-transparent text-ink/70 border-ink/25 hover:border-ink/50"
             }`}
           >
             {m === "paste" ? "Paste text" : "Upload file"}
@@ -49,7 +49,7 @@ export default function DocInput({
           </label>
           <textarea
             id={textId}
-            className="focus-ring w-full min-h-[160px] rounded-md border border-ink/20 p-3 text-sm font-mono bg-white/70"
+            className="focus-ring w-full min-h-[160px] rounded border border-ink/20 p-3 text-sm font-doc bg-white leading-relaxed"
             placeholder="Paste the document text here…"
             value={value.text ?? ""}
             onChange={(e) => onChange({ text: e.target.value })}
@@ -64,7 +64,7 @@ export default function DocInput({
             id={fileId}
             type="file"
             accept=".pdf,.docx,.txt,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            className="focus-ring w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-accent file:text-white file:px-3 file:py-2 file:text-sm file:cursor-pointer"
+            className="focus-ring w-full text-sm file:mr-3 file:rounded file:border-0 file:bg-ink file:text-paper file:px-3 file:py-2 file:text-sm file:cursor-pointer"
             onChange={(e) => {
               const f = e.target.files?.[0];
               onChange({ file: f });
@@ -72,7 +72,7 @@ export default function DocInput({
           />
           <p className="text-xs text-ink/50 mt-2">PDF, DOCX, or TXT — up to 15MB.</p>
           {value.file && (
-            <p className="text-xs text-accent mt-1" aria-live="polite">
+            <p className="text-xs text-stamp mt-1" aria-live="polite">
               Selected: {value.file.name}
             </p>
           )}

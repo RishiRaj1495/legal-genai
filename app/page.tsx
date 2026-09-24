@@ -20,36 +20,39 @@ export default function Home() {
   const [active, setActive] = useState("simplify");
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-10">
-      <header className="mb-6">
-        <h1 className="font-serif text-3xl font-bold">Legal Clarity AI</h1>
-        <p className="text-ink/70 mt-1">
-          Understand, compare, and navigate legal documents — in plain language.
-        </p>
+    <main className="max-w-4xl mx-auto px-4 py-10 sm:py-14">
+      <header className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <p className="text-xs tracking-wide text-ink/50 mb-1">Plain-language document review</p>
+          <h1 className="font-display text-4xl sm:text-[2.75rem] leading-none">Legal Clarity</h1>
+        </div>
+        <div
+          aria-label="Legal disclaimer"
+          className="shrink-0 self-start sm:self-auto border-2 border-risk/70 text-risk text-[11px] font-medium px-3 py-2 rounded -rotate-1 leading-snug max-w-[220px]"
+        >
+          Not legal advice. Information to help you understand a document and prepare
+          for a professional — not a substitute for one.
+        </div>
       </header>
 
-      <div
-        role="note"
-        aria-label="Legal disclaimer"
-        className="mb-6 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg p-3"
-      >
-        <strong>Not legal advice.</strong> This tool explains and organizes information
-        to help you understand documents and prepare for a conversation with a licensed
-        professional. It does not replace one.
-      </div>
+      <section aria-label="Legal Clarity tools">
+        <Tabs tabs={TABS} active={active} onChange={setActive} />
+        <div
+          id={`panel-${active}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${active}`}
+          className="border border-ink/20 rounded-b-md rounded-tr-md bg-paper p-5 sm:p-6"
+        >
+          {active === "simplify" && <Simplify />}
+          {active === "clauses" && <Clauses />}
+          {active === "qa" && <QA />}
+          {active === "compare" && <Compare />}
+          {active === "checklist" && <Checklist />}
+        </div>
+      </section>
 
-      <Tabs tabs={TABS} active={active} onChange={setActive} />
-
-      <div id={`panel-${active}`} role="tabpanel" aria-labelledby={`tab-${active}`}>
-        {active === "simplify" && <Simplify />}
-        {active === "clauses" && <Clauses />}
-        {active === "qa" && <QA />}
-        {active === "compare" && <Compare />}
-        {active === "checklist" && <Checklist />}
-      </div>
-
-      <footer className="mt-12 text-xs text-ink/40 text-center">
-        -Rishi
+      <footer className="mt-10 text-xs text-ink/45 text-center">
+        Documents are processed per-request and never stored.
       </footer>
     </main>
   );

@@ -5,13 +5,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#14181f",
-        paper: "#f7f5ef",
-        accent: "#2f5d50",
-        risk: "#b3452b",
+        ink: "#16202b", // deep navy-black — primary text & chrome
+        paper: "#eef1ec", // cool onion-skin paper — background
+        accent: "#f0b429", // highlighter yellow — reserved for the one primary action per screen
+        risk: "#b1372d", // redline red — risk/high-severity ink
+        stamp: "#1f6f6b", // notary-stamp teal — secondary/tertiary accent
       },
       fontFamily: {
-        serif: ["Georgia", "ui-serif", "serif"],
+        display: ["Fraunces", "Georgia", "serif"],
+        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
+        doc: ["IBM Plex Mono", "Consolas", "monospace"],
       },
     },
   },

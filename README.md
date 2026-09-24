@@ -86,9 +86,37 @@ Visit http://localhost:3000.
 
 ## Testing
 
+CI (`.github/workflows/ci.yml`) runs lint, type-check, tests, and a build on every push/PR.
+
 ```bash
 npm test
 ```
+
+17 tests: unit tests for the JSON-extraction/validation utilities, plus route-level tests for
+`/api/simplify` and `/api/clauses` that mock the model call (`vi.mock("@/lib/anthropic")`) —
+no live API calls, no cost, deterministic — covering validation errors, the success path, the
+streamed-text path, and upstream-failure mapping to a clean 502.
+
+## Efficiency notes
+
+- **Streaming**: the Simplify route streams the model's response (`ReadableStream` +
+  `anthropic.messages.stream`) for pasted text, so the UI renders text as it's generated
+  instead of waiting for the full ~2000-token completion to buffer server-side first.
+- **Request cancellation**: every feature panel holds an `AbortController` — a new run
+  cancels any stale in-flight request, and unmounting a panel (switching tabs) cancels it
+  too, so the browser and the serverless function both stop doing wasted work.
+- **Client-side answer cache**: the Q&A panel caches answers by document+question, so
+  re-asking the same question (a common pattern — re-reading an answer, retyping after a
+  typo) is instant and doesn't re-spend a model call.
+- Document text is parsed once per request and capped at ~120k characters before being
+  sent to the model, rather than re-parsing or re-sending on every follow-up turn.
+
+## Deploying (Vercel)
+
+1. Push this repo to GitHub (public).
+2. Import it at https://vercel.com/new.
+3. Add the `ANTHROPIC_API_KEY` environment variable in the Vercel project settings.
+4. Deploy — Vercel builds the Next.js app automatically.
 
 ## Limitations (by design)
 

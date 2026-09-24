@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DocInput, { DocValue } from "../DocInput";
 import { generateChecklist } from "@/lib/api";
 
@@ -9,16 +9,24 @@ export default function Checklist() {
   const [result, setResult] = useState<Awaited<ReturnType<typeof generateChecklist>> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
   const hasInput = Boolean(doc.text?.trim() || doc.file);
 
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
   async function run() {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      setResult(await generateChecklist(doc));
+      setResult(await generateChecklist(doc, controller.signal));
     } catch (e) {
+      if ((e as Error).name === "AbortError") return;
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
@@ -35,7 +43,7 @@ export default function Checklist() {
         type="button"
         onClick={run}
         disabled={!hasInput || loading}
-        className="focus-ring bg-accent text-white text-sm font-medium px-4 py-2 rounded-md disabled:opacity-40"
+        className="focus-ring bg-accent text-ink text-sm font-semibold px-4 py-2 rounded-md disabled:opacity-40 hover:brightness-95"
       >
         {loading ? "Building checklist…" : "Generate checklist"}
       </button>
@@ -72,7 +80,7 @@ function Section({
   return (
     <div
       className={`border rounded-lg p-3 ${
-        tone === "risk" ? "bg-risk/10 border-risk/30" : "bg-white/70 border-ink/10"
+        tone === "risk" ? "bg-risk/10 border-risk/30" : "bg-white border-ink/15"
       }`}
     >
       <h3 className="font-semibold text-sm mb-2">{title}</h3>

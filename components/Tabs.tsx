@@ -23,26 +23,33 @@ export default function Tabs({
   };
 
   return (
-    <div role="tablist" aria-label="Legal Clarity AI features" className="flex flex-wrap gap-2 mb-6">
-      {tabs.map((t, idx) => (
-        <button
-          key={t.id}
-          role="tab"
-          id={`tab-${t.id}`}
-          aria-selected={active === t.id}
-          aria-controls={`panel-${t.id}`}
-          tabIndex={active === t.id ? 0 : -1}
-          onClick={() => onChange(t.id)}
-          onKeyDown={(e) => onKeyDown(e, idx)}
-          className={`focus-ring px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-            active === t.id
-              ? "bg-ink text-paper border-ink"
-              : "bg-white/60 text-ink/70 border-ink/15 hover:border-ink/40"
-          }`}
-        >
-          {t.label}
-        </button>
-      ))}
+    <div
+      role="tablist"
+      aria-label="Legal Clarity features"
+      className="flex flex-wrap gap-x-1 -mb-px relative z-10"
+    >
+      {tabs.map((t, idx) => {
+        const isActive = active === t.id;
+        return (
+          <button
+            key={t.id}
+            role="tab"
+            id={`tab-${t.id}`}
+            aria-selected={isActive}
+            aria-controls={`panel-${t.id}`}
+            tabIndex={isActive ? 0 : -1}
+            onClick={() => onChange(t.id)}
+            onKeyDown={(e) => onKeyDown(e, idx)}
+            className={`focus-ring text-sm font-medium px-4 py-2.5 rounded-t-md border border-b-0 transition-colors ${
+              isActive
+                ? "bg-paper text-ink border-ink/20 relative"
+                : "bg-ink/5 text-ink/55 border-transparent hover:text-ink/80 hover:bg-ink/10 translate-y-[3px]"
+            }`}
+          >
+            {t.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
