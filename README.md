@@ -84,13 +84,6 @@ Visit http://localhost:3000.
 npm test
 ```
 
-## Deploying (Vercel)
-
-1. Push this repo to GitHub (public).
-2. Import it at https://vercel.com/new.
-3. Add the `ANTHROPIC_API_KEY` environment variable in the Vercel project settings.
-4. Deploy — Vercel builds the Next.js app automatically.
-
 ## Limitations (by design)
 
 - Scanned/image-only PDFs aren't OCR'd — text-based PDFs, DOCX, and TXT only.
