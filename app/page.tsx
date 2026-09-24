@@ -49,7 +49,7 @@ export default function Home() {
       </div>
 
       <footer className="mt-12 text-xs text-ink/40 text-center">
-        Built with Claude (Anthropic API) · Rishi
+        -Rishi
       </footer>
     </main>
   );
