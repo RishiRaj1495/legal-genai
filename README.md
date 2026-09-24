@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/image.png" alt="App Banner" width="95%" style="border-radius:14px; box-shadow: 0 20px 40px rgba(0,0,0,0.45);" />
+  <img src="assets/image.png" alt="App Banner" width="95%" style="border-radius:14px; box-shadow: 0 20px 40px rgba(0,0,0,0.45);" />
 </div>
 
 <br/>
