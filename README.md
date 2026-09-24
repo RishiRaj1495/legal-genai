@@ -78,7 +78,7 @@ be actively harmful.
 
 ```bash
 npm install
-cp .env.example .env.local   # add your ANTHROPIC_API_KEY
+cp .env.example .env.local   # add your API_KEY
 npm run dev
 ```
 
